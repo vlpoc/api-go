@@ -64,13 +64,13 @@ func ContextWithConfig(ctx context.Context, sysDomain string, opts ...Option) (c
 	return context.WithValue(ctx, configKey, cfg), nil
 }
 
-// func ConfigFromContext(ctx context.Context) (cfg *Config, ok bool) {
-// 	c, ok := ctx.Value(configKey).(*Config)
-// 	return c, ok
-// }
+func configFromContext(ctx context.Context) (cfg *config, ok bool) {
+	c, ok := ctx.Value(configKey).(*config)
+	return c, ok
+}
 
 func Domain(ctx context.Context) string {
-	c, ok := ConfigFromContext(ctx)
+	c, ok := configFromContext(ctx)
 	if ok {
 		return c.Domain()
 	}
@@ -78,7 +78,7 @@ func Domain(ctx context.Context) string {
 }
 
 func AuthConnstr(ctx context.Context) string {
-	c, ok := ConfigFromContext(ctx)
+	c, ok := configFromContext(ctx)
 	if ok {
 		return c.AuthConnstr()
 	}
@@ -86,7 +86,7 @@ func AuthConnstr(ctx context.Context) string {
 }
 
 func AuthCert(ctx context.Context) string {
-	c, ok := ConfigFromContext(ctx)
+	c, ok := configFromContext(ctx)
 	if ok {
 		return c.authCertPath
 	}

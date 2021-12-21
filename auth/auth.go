@@ -245,16 +245,19 @@ func (a *Actor) String() string {
 }
 
 func Login(ctx context.Context, user, pass string) (context.Context, error) {
-	as := newAuthSrv(sys.AuthCert(ctx))
+	as, err := newAuthSrv(sys.AuthCert(ctx))
+	if err != nil {
+		return ctx, err
+	}
 	defer as.Close()
 	a, err := as.login(ctx, user, pass)
 	if err != nil {
 		return ctx, err
 	}
-	return context.WithValue(actorKey, a), nil
+	return context.WithValue(ctx, actorKey, a), nil
 }
 
 func GetActor(ctx context.Context) (a *Actor, ok bool) {
-	a, ok := ctx.Value(actorKey).(*Actor)
-	return a, ok
+	a, ok = ctx.Value(actorKey).(*Actor)
+	return
 }
