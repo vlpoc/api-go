@@ -11,14 +11,14 @@ type keyType int
 var configKey keyType = keyType(10)
 
 type config struct {
-	base         string
-	auth         string
-	authport     uint16
-	authCertPath string
+	base     string
+	auth     string
+	authport uint16
+	sysCA    string
 }
 
 func (c *config) AuthConnstr() string {
-	return net.JoinHostPort(c.base+"."+c.auth, strconv.Itoa(int(c.authport)))
+	return net.JoinHostPort(c.auth+"."+c.base, strconv.Itoa(int(c.authport)))
 }
 
 func (c *config) Domain() string {
@@ -43,9 +43,9 @@ func WithAuthPort(port uint16) Option {
 	}
 }
 
-func WithAuthCert(path string) Option {
+func WithCertAuthority(path string) Option {
 	return func(c *config) {
-		c.authCertPath = path
+		c.sysCA = path
 	}
 }
 
@@ -85,10 +85,10 @@ func AuthConnstr(ctx context.Context) string {
 	return ""
 }
 
-func AuthCert(ctx context.Context) string {
+func CAPath(ctx context.Context) string {
 	c, ok := configFromContext(ctx)
 	if ok {
-		return c.authCertPath
+		return c.sysCA
 	}
 	return ""
 }

@@ -28,9 +28,6 @@ type authSrv struct {
 	c    authpb.AuthClient
 }
 
-// // TODO: Automatically derive auth. prefixes, etc.
-// // should just be able to say NewAuthSrv("mydomain.com", ...) and have it find "auth.mydomain.com".
-// // We should also default the port number.
 func newAuthSrv(certFile string) (*authSrv, error) {
 	pool := x509.NewCertPool()
 	data, err := os.ReadFile(certFile)
@@ -57,8 +54,6 @@ func (s *authSrv) connect(ctx context.Context) error {
 		VerifyConnection: func(s tls.ConnectionState) error {
 			return nil
 		},
-		// TODO: Hardcoded. The domain should come from NewAuthSrv.
-		// for now the auth user (auth@) is fine hard-coded.
 		ServerName: "auth@" + sys.Domain(ctx),
 	}
 	connStr := sys.AuthConnstr(ctx)
@@ -245,7 +240,7 @@ func (a *Actor) String() string {
 }
 
 func Login(ctx context.Context, user, pass string) (context.Context, error) {
-	as, err := newAuthSrv(sys.AuthCert(ctx))
+	as, err := newAuthSrv(sys.CAPath(ctx))
 	if err != nil {
 		return ctx, err
 	}
