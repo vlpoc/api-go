@@ -1,3 +1,7 @@
+// package auth is used to interact with the vlpoc authentication system.
+// it relies on cluster configuration located in the passed context.Context, which can be set with the sys package.
+//
+// Login will be the most useful function in this package.
 package auth
 
 import (
@@ -199,6 +203,7 @@ func (s *authSrv) Close() error {
 	return nil
 }
 
+// Actor represents a user or other agent within a vlpoc system.
 type Actor struct {
 	Name      string
 	Namespace string
@@ -211,6 +216,9 @@ type Actor struct {
 
 var actorRE *regexp.Regexp = regexp.MustCompile(`^([^/@\s]+)(/([^/@\s]+))?(@(\S+))?$`)
 
+// ParseActor parses an actor from an actor string in the form of
+//  name(/namespace)?(@domain)?
+// and returns an unauthenticated Actor.
 func ParseActor(actor string) (*Actor, error) {
 	matches := actorRE.FindStringSubmatch(actor)
 	if matches == nil {
@@ -223,6 +231,7 @@ func ParseActor(actor string) (*Actor, error) {
 	}, nil
 }
 
+// String prints the Actor in the same format parsed by ParseActor.
 func (a *Actor) String() string {
 	if a.Domain != "" {
 		if a.Namespace != "" {
@@ -239,6 +248,8 @@ func (a *Actor) String() string {
 	}
 }
 
+// Login uses a user/password to log into a vlpoc cluster.
+// One must have been configured in ctx using sys.Config
 func Login(ctx context.Context, user, pass string) (context.Context, error) {
 	as, err := newAuthSrv(sys.CAPath(ctx))
 	if err != nil {
@@ -252,6 +263,7 @@ func Login(ctx context.Context, user, pass string) (context.Context, error) {
 	return context.WithValue(ctx, actorKey, a), nil
 }
 
+// GetActor returns the currently logged-in Actor, if any.
 func GetActor(ctx context.Context) (a *Actor, ok bool) {
 	a, ok = ctx.Value(actorKey).(*Actor)
 	return
