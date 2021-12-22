@@ -1,0 +1,28 @@
+FROM golang:alpine
+
+WORKDIR /build
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
+
+COPY . .
+
+WORKDIR /build/exec/cmd/k8exec
+RUN ls -alh
+RUN go build
+RUN ls -alh
+
+FROM alpine:latest  
+RUN apk --no-cache add ca-certificates
+
+## Install kubectl
+RUN apk --no-cache add curl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+RUN install kubectl /usr/bin/kubectl
+RUN apk del curl
+
+## Copy k8exec binary
+WORKDIR /root/
+COPY --from=0 /build/exec/cmd/k8exec/k8exec ./
+CMD ["./k8exec"] 

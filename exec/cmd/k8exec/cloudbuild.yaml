@@ -1,0 +1,28 @@
+steps:
+  # build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - build
+      - -t
+      - us-east1-docker.pkg.dev/$PROJECT_ID/vlpoc/k8exec:latest
+      - -t
+      - us-east1-docker.pkg.dev/$PROJECT_ID/vlpoc/k8exec:$SHORT_SHA
+      - -f
+      - k8exec-dockerfile
+      - .
+  # push container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - push
+      - us-east1-docker.pkg.dev/$PROJECT_ID/vlpoc/k8exec:latest
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      - push
+      - us-east1-docker.pkg.dev/$PROJECT_ID/vlpoc/k8exec:$SHORT_SHA
+  - name: "gcr.io/cloud-builders/gke-deploy"
+    args:
+    - run
+    - --filename=exec/cmd/k8exec/_gke/deyloyment.yaml
+    - --image=us-east1-docker.pkg.dev/$PROJECT_ID/vlpoc/k8exec:$SHORT_SHA
+    - --location=us-central1-a
+    - --cluster=nginx-1-cluster

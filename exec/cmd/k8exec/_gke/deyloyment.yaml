@@ -1,0 +1,55 @@
+# Please see: https://itnext.io/running-kubectl-commands-from-within-a-pod-b303e8176088
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8exec
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8exec
+  template:
+    metadata:
+      labels:
+        app: k8exec
+    spec:
+      serviceAccountName: exec-kubectl
+      containers:
+      - name: k8exec
+        image: us-east1-docker.pkg.dev/ascendant-quest-124500/vlpoc/k8exec:sha
+#        ports:
+#        - containerPort: 8182
+#          protocol: TCP
+#        env:
+#        - name: AUTHSRV_AUTHDIR
+#          value: "/etc/authsrv"
+        imagePullPolicy: IfNotPresent
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+#        volumeMounts:
+#        - name: authsrv-authdir
+#          mountPath: "/etc/authsrv"
+#          readOnly: true
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+#      volumes:
+#        - name: authsrv-authdir
+#          secret:
+#            secretName: authsrv-authdir
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8exec
+spec:
+  selector:
+    app: k8exec
+  ports:
+    - protocol: TCP
+      port: 8182
+      targetPort: 8182
+  type: NodePort

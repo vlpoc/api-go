@@ -3,7 +3,7 @@ module github.com/vlpoc/api-go
 go 1.17
 
 require (
-	github.com/vlpoc/proto v0.2.0
+	github.com/vlpoc/proto v0.3.0
 	google.golang.org/grpc v1.43.0
 )
 
