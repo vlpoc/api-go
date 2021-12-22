@@ -16,13 +16,18 @@ RUN ls -alh
 FROM alpine:latest  
 RUN apk --no-cache add ca-certificates
 
-## Install kubectl
-RUN apk --no-cache add curl
+## Install kubectl & envsubst
+RUN apk --no-cache add curl gettext
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 RUN install kubectl /usr/bin/kubectl
+# This installs helm if we decide to migrate helm later. Right now it is overkill.
+#RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+#RUN chmod 700 get_helm.sh
+#RUN ./get_helm.sh
 RUN apk del curl
 
 ## Copy k8exec binary
 WORKDIR /root/
 COPY --from=0 /build/exec/cmd/k8exec/k8exec ./
+COPY exec/cmd/k8exec/job ./
 CMD ["./k8exec"] 

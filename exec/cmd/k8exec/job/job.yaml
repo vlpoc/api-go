@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${EXE_NAME}
+spec:
+  template:
+    spec:
+      containers:
+      - name: ${EXE_NAME}
+        image: ${EXE_IMG}
+        command: ${EXE_COMMAND} // EXE_COMMAND must be in the form: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4
